@@ -3,7 +3,7 @@ import { CorsOptions } from "cors";
 
 export const corsOption: CorsOptions ={
     origin: (origin,cb) => {
-        const allowOrigin = ["http://localhost:3000"]
+        const allowOrigin = ["http://localhost:4000"]
         if(!origin || allowOrigin.indexOf(origin) !== -1) {
             cb(new Error("NOT ALLOWED BY CORS"))
         }else {

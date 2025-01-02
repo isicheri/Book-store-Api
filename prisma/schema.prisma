@@ -19,11 +19,41 @@ enum Role {
   USER
 }
 
+enum AccessType {
+  PUBLIC
+  PRIVATE
+}
+
 model User {
 id Int @id @default(autoincrement())
 username String @unique
 password String 
 role Role @default(USER)
+books Book[]
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
+
+@@map("users")
+}
+
+model Book {
+  id Int @id @default(autoincrement())
+  title String @unique
+  author String
+  accesType AccessType @default(PUBLIC)
+  userId Int
+  user User @relation(fields: [userId],references: [id])
+  pages Page[]
+
+@@map("books")
+}
+
+model Page {
+ id Int @id @default(autoincrement())
+ message String
+ pageNo Int
+bookId Int
+book Book @relation(fields: [bookId],references: [id])
+
+@@map("pages")
 }

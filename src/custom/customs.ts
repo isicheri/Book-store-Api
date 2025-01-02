@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { NextFunction, Request,Response } from "express";
 
 export const requestLogger = (req:Request,res:Response,next: NextFunction) => {
@@ -7,3 +8,7 @@ export const requestLogger = (req:Request,res:Response,next: NextFunction) => {
     console.log(`${timeStamp},${method}, ${url}`)
     next()
 } 
+
+export interface IGetUserAuthInfoRequest extends Request {
+    user: User | undefined;
+}

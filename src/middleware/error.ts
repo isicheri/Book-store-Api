@@ -4,7 +4,7 @@ import { HttpException } from "../exceptions/roots"
 
  export const errorMiddleWare = (error: HttpException,req:Request,res:Response,next:NextFunction) =>{
     res.status(error.statusCode || 500).json({
-    success: error.message,
+    success: false,
     message: error.message,
     errorCode: error.errorCode,
     error:error.errors,

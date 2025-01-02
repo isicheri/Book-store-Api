@@ -13,11 +13,11 @@ import { NotFound } from "../exceptions/not-found-exception";
 export const registerUser = async (req:Request,res:Response) => {
     const validateData = registerUserSchema.parse(req.body)
     const user = await prismaClient.user.create({
-        data: {...validateData,password: hashSync(validateData.password,10)}
+        data: {
+            username: validateData.username,
+            password: hashSync(validateData.password,10)
+        }
     })
-    if(user) {
-        throw new BadRequestException("user already exists",ErrorCode.BAD_REQUEST,null)
-    }
     res.json(user)
 }
 
@@ -34,4 +34,3 @@ export const login = async(req:Request,res:Response) => {
     const token = jwt.sign(payload,"secret",{expiresIn: "1h"})
     res.json({data: {user,token}})
 }
-

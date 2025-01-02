@@ -1,4 +1,5 @@
 import express,{Express} from "express"
+import {rateLimit} from "express-rate-limit"
 import cors from "cors"
 import { PORT } from "./secrets";
 import { PrismaClient } from "@prisma/client";
@@ -6,11 +7,13 @@ import RootRouter from "./routes";
 import { corsOption } from "./configs/cors.config";
 import { requestLogger } from "./custom/customs";
 import {errorMiddleWare} from "./middleware/error";
+import { rateLimitConfig } from "./configs/rate.config";
 
 const app:Express = express();
 
 app.use(requestLogger)
 app.use(express.json())
+app.use(rateLimit(rateLimitConfig))
 // app.use(cors(corsOption))
 //  //  we are going to leave it commented for now
 //1.enable cors  res.set('Access-Control-Allow-Origin', 'http://localhost:3001');

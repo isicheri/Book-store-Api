@@ -25,35 +25,59 @@ enum AccessType {
 }
 
 model User {
-id Int @id @default(autoincrement())
-username String @unique
-password String 
-role Role @default(USER)
-books Book[]
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      Role     @default(USER)
+  books     Book[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-@@map("users")
+  @@map("users")
 }
 
 model Book {
-  id Int @id @default(autoincrement())
-  title String @unique
-  author String
+  id        Int        @id @default(autoincrement())
+  title     String     @unique
+  author    String
   accesType AccessType @default(PUBLIC)
-  userId Int
-  user User @relation(fields: [userId],references: [id])
-  pages Page[]
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id])
+  pages     Page[]
+  reviews   Review[]
+  Like      Like[]
 
-@@map("books")
+  @@map("books")
 }
 
 model Page {
- id Int @id @default(autoincrement())
- message String
- pageNo Int
-bookId Int
-book Book @relation(fields: [bookId],references: [id])
+  id        Int      @id @default(autoincrement())
+  message   String
+  pageNo    Int
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-@@map("pages")
+  @@map("pages")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  review    String
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+model Like {
+  id     Int  @id @default(autoincrement())
+  userId Int
+  bookId Int
+  book   Book @relation(fields: [bookId], references: [id])
+
+  @@map("likes")
 }

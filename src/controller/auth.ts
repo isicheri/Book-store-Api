@@ -34,3 +34,7 @@ export const login = async(req:Request,res:Response) => {
     const token = jwt.sign(payload,"secret",{expiresIn: "1h"})
     res.json({data: {user,token}})
 }
+
+
+export const refreshToken = () => {}
+export const logoutUer = () => {}

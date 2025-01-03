@@ -12,14 +12,19 @@ import { rmSync } from "fs";
 
 export const CreateBook = async(req:IGetUserAuthInfoRequest,res: Response) => {
     const validatedData = createBookSchema.parse(req.body)
-        const books =  await prismaClient.book.create({
+    
+    const book = await prismaClient.book.findFirstOrThrow({where:{title: validatedData.title}})
+    if(book) {
+        throw new BadRequestException("Book Title is already take",ErrorCode.BAD_REQUEST,null)
+    }
+        const mainBook =  await prismaClient.book.create({
             data: {
              title: validatedData.title,
              author: req.user.username ,
              userId: req.user.id
             }
         })
-        res.json(books)
+        res.json(mainBook)
 }
 
 export const updateBookAccess = async(req:IGetUserAuthInfoRequest,res:Response) => {
@@ -41,7 +46,7 @@ export const updateBookAccess = async(req:IGetUserAuthInfoRequest,res:Response) 
 
 export const getBookById = async(req:IGetUserAuthInfoRequest,res:Response) => {
           try {
-            const book = await prismaClient.book.findFirstOrThrow({where: {id: +req.params.id}})
+            const book = await prismaClient.book.findFirstOrThrow({where: {id: +req.params.id},include: {pages: true,reviews: true,Like: true}})
                   if(req.user.role !== "ADMIN" || req.user.username !== book.author) {
                     throw new BadRequestException("sorry book is not accessible",ErrorCode.BAD_REQUEST,null)
                   }else {
@@ -53,26 +58,74 @@ export const getBookById = async(req:IGetUserAuthInfoRequest,res:Response) => {
 }
 
 
-export const getAllBookPublicBooks = async(req:IGetUserAuthInfoRequest,res:Response) => {
-    const books = await prismaClient.book.findMany({where: {accesType: "PUBLIC"}})
-    res.json(books)
+export const getAllPublicBooks = async(req:IGetUserAuthInfoRequest,res:Response) => {
+    const books = await prismaClient.book.findMany()
+    const filteredPrivateBook = books.filter((book) => book.accesType === "PUBLIC")
+    res.json(filteredPrivateBook)
 }
 
 export const getAllPrivateBooks = async(req:IGetUserAuthInfoRequest,res:Response) => {
-    if(req.user.role === "ADMIN") {
-        console.log("yes!");
-    }
-    const books = await prismaClient.book.findMany({where: {accesType: "PRIVATE"},include: {pages: true,reviews: true,Like: true}})
+    const books = await prismaClient.book.findMany()
+    const filteredPrivateBook = books.filter((book) => book.accesType === "PRIVATE")
     res.json(books)
 }
 
-export const likeBook = (req:IGetUserAuthInfoRequest,res:Response) => {
-    const book = "";
-    const like = "";
+export const likeBook = async (req:IGetUserAuthInfoRequest,res:Response) => {
+    const book = await prismaClient.book.findFirstOrThrow({where: {id: +req.params.bookId}});
+    try {
+        const like = await prismaClient.like.create({
+    data: {
+        bookId: book.id,
+        userId: req.user.id
+    }
+        })
+        res.json({
+            success: true,
+            data: like
+        })
+    } catch (error) {
+        throw new BadRequestException("an error occured",ErrorCode.BAD_REQUEST,error)
+    }
 }
 
-export const unlikeBook = (req:IGetUserAuthInfoRequest,res:Response) => {}
+export const unlikeBook = async(req:IGetUserAuthInfoRequest,res:Response) => {
+ const like =  await prismaClient.like.findFirstOrThrow({where: {bookId: +req.params.bookId}})
+ if(like.userId === req.user.id) {
+   await prismaClient.like.delete({
+    where: {id: like.id}
+   })
+   res.json({
+    success: true,
+    data: {message: "you unliked the book"}
+   })
+ }else {
+    throw new BadRequestException("you cant delete book",ErrorCode.BAD_REQUEST,null)
+ }
+}
 
-export const getAllBooks = (req:IGetUserAuthInfoRequest,res:Response) =>{}
+export const getAllBooks = async(req:IGetUserAuthInfoRequest,res:Response) =>{
+    const books = await prismaClient.book.findMany({include: {Like: true,reviews: true,pages:true}});
+    res.json(books)
+}
 
-export const  addPagesToBook = (req:IGetUserAuthInfoRequest,res:Response) => {}
+//still working on this
+
+// export const  addPagesToBook = async(req:IGetUserAuthInfoRequest,res:Response) => {
+//      try {
+//         const book = await prismaClient.book.findFirstOrThrow({where:{id: +req.params.bookId},include:{pages:true}});
+//         if(!book) {
+//             throw new NotFound("Book Not Found",ErrorCode.NOT_FOUND,null)
+//         }
+//         const data = await prismaClient.page.create({data: {
+//             message: req.body.content,
+//             pageNo: +req.params.pageNo,
+//             book: book
+//         }})
+//         // res.json({
+//         //     message: `page ${data.pageNo} successfully added to book`,
+//         // })
+//         res.json(book)
+//     } catch (error) {
+//         throw new BadRequestException(error.message,ErrorCode.BAD_REQUEST,error)
+//     }
+// }

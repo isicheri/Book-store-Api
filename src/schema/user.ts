@@ -10,3 +10,7 @@ export const loginUserSchema = z.object({
     username: z.string().toUpperCase(),
     password: z.string()
 })
+
+export const updateUserSchema = z.object({
+    username: z.string().toUpperCase(),
+})

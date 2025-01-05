@@ -30,6 +30,7 @@ model User {
   password  String
   role      Role     @default(USER)
   books     Book[]
+  reviews   Review[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -67,6 +68,8 @@ model Review {
   review    String
   bookId    Int
   book      Book     @relation(fields: [bookId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

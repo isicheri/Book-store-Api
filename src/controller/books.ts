@@ -110,22 +110,21 @@ export const getAllBooks = async(req:IGetUserAuthInfoRequest,res:Response) =>{
 
 //still working on this
 
-// export const  addPagesToBook = async(req:IGetUserAuthInfoRequest,res:Response) => {
-//      try {
-//         const book = await prismaClient.book.findFirstOrThrow({where:{id: +req.params.bookId},include:{pages:true}});
-//         if(!book) {
-//             throw new NotFound("Book Not Found",ErrorCode.NOT_FOUND,null)
-//         }
-//         const data = await prismaClient.page.create({data: {
-//             message: req.body.content,
-//             pageNo: +req.params.pageNo,
-//             book: book
-//         }})
-//         // res.json({
-//         //     message: `page ${data.pageNo} successfully added to book`,
-//         // })
-//         res.json(book)
-//     } catch (error) {
-//         throw new BadRequestException(error.message,ErrorCode.BAD_REQUEST,error)
-//     }
-// }
+export const  addPagesToBook = async(req:IGetUserAuthInfoRequest,res:Response) => {
+     try {
+        const book = await prismaClient.book.findFirstOrThrow({where:{id: +req.params.bookId},include:{pages:true}});
+        if(!book) {
+            throw new NotFound("Book Not Found",ErrorCode.NOT_FOUND,null)
+        }
+       const page = await prismaClient.page.create({
+        data: {
+            message: req.body.content,
+            bookId: req.body.bookId,
+            pageNo: +req.params.pageNO
+        }
+       })
+      res.json(page)
+    } catch (error) {
+        throw new BadRequestException(error.message,ErrorCode.BAD_REQUEST,error)
+    }
+}
